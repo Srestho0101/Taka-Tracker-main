@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taka Tracker Test</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        body { font-family: Arial; padding: 20px; }
+        .test { margin: 10px 0; padding: 10px; border-radius: 8px; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Taka Tracker V3 - Bug Test</h1>
+    <div id="tests"></div>
+    <hr>
+    <h2>App Preview:</h2>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Test Results Component
+        function TestResults({ tests }) {
+            return (
+                <div>
+                    {tests.map((test, i) => (
+                        <div key={i} className={`test ${test.pass ? 'pass' : 'fail'}`}>
+                            {test.pass ? '✅' : '❌'} {test.name}: {test.message}
+                        </div>
+                    ))}
+                </div>
+            );
+        }
+
+        // Run Tests
+        const tests = [];
+
+        // Test 1: React and hooks
+        try {
+            const [state] = useState(0);
+            const ref = useRef(null);
+            tests.push({ name: 'React Hooks', pass: true, message: 'useState and useRef working' });
+        } catch (e) {
+            tests.push({ name: 'React Hooks', pass: false, message: e.message });
+        }
+
+        // Test 2: LocalStorage
+        try {
+            localStorage.setItem('test', 'value');
+            const val = localStorage.getItem('test');
+            localStorage.removeItem('test');
+            tests.push({ name: 'LocalStorage', pass: val === 'value', message: 'Working correctly' });
+        } catch (e) {
+            tests.push({ name: 'LocalStorage', pass: false, message: e.message });
+        }
+
+        // Test 3: Date functions
+        try {
+            const monthKey = `${new Date().getFullYear()}-${String(new Date().getMonth() + 1).padStart(2, '0')}`;
+            tests.push({ name: 'Date Functions', pass: true, message: `Current month: ${monthKey}` });
+        } catch (e) {
+            tests.push({ name: 'Date Functions', pass: false, message: e.message });
+        }
+
+        // Mini App Component
+        function MiniApp() {
+            const [count, setCount] = useState(0);
+            const timeoutRef = useRef(null);
+
+            const handleClick = () => {
+                setCount(c => c + 1);
+                if (timeoutRef.current) clearTimeout(timeoutRef.current);
+                timeoutRef.current = setTimeout(() => {
+                    console.log('Timeout cleared successfully');
+                }, 1000);
+            };
+
+            return (
+                <div style={{padding: '20px', background: '#f0f0f0', borderRadius: '8px'}}>
+                    <h3>Mini Test App</h3>
+                    <p>Count: {count}</p>
+                    <button onClick={handleClick} style={{
+                        padding: '10px 20px',
+                        background: '#0d9488',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer'
+                    }}>
+                        Click Me (Tests useRef timeout)
+                    </button>
+                </div>
+            );
+        }
+
+        // Render tests
+        const testsRoot = ReactDOM.createRoot(document.getElementById('tests'));
+        testsRoot.render(<TestResults tests={tests} />);
+
+        // Render mini app
+        const appRoot = ReactDOM.createRoot(document.getElementById('root'));
+        appRoot.render(<MiniApp />);
+    </script>
+</body>
+</html>
